@@ -1,0 +1,418 @@
+<!--
+  TransfertCI – Page de maintenance
+  Single-file HTML + CSS + JS
+  Remplacez la source vidéo ci-dessous (ligne <source src="…">) par votre propre MP4 court (6–15s) qui boucle bien.
+  Astuce: utilisez une vidéo sans son, 1080p max, pour éviter les blocages d'autoplay sur mobile.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TransfertCI — Maintenance en cours</title>
+  <meta name="theme-color" content="#0ff" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#05060a;
+      --glass:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.18);
+      --text:rgba(255, 255, 255, 0.92);
+      --muted:rgba(255,255,255,.65);
+      --neon:#00f5ff;
+      --neon-2:#7c4dff;
+      --accent:#00ffd1;
+      --danger:#ff3d71;
+      --orange:#ff6b35;
+      --orange-2:#ff8c42;
+      --orange-glow:#ffa500;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text);
+      background:var(--bg);
+      overflow:hidden;
+    }
+    /* Background video */
+    .bg{
+      position:fixed; inset:0; z-index:-3;
+      overflow:hidden;
+      filter:contrast(1.05) brightness(0.8) saturate(1.15);
+    }
+    .bg video{
+      position:absolute; min-width:100%; min-height:100%;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      object-fit:cover;
+    }
+    /* Aurora gradient overlay */
+    .aurora{
+      position:fixed; inset:-20vmax; z-index:-2;
+      background: radial-gradient(60vmax 60vmax at 10% 20%, rgba(0,255,225,.25), transparent 60%),
+                  radial-gradient(50vmax 50vmax at 90% 10%, rgba(124,77,255,.20), transparent 60%),
+                  radial-gradient(70vmax 70vmax at 50% 120%, rgba(0,245,255,.18), transparent 60%);
+      filter:blur(40px);
+      animation: aurora 18s linear infinite;
+    }
+    @keyframes aurora{to{transform:translate3d(2%, -2%, 0) rotate(1deg)}}
+
+    /* Particle canvas */
+    canvas#fx{position:fixed; inset:0; z-index:-1; pointer-events:none}
+
+    /* Glass container */
+    .wrap{
+      position:relative; min-height:100vh; display:grid; place-items:center; padding:clamp(16px,2vw,32px);
+    }
+    .card{
+      position:relative; width:min(980px,94vw);
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      border-radius:28px;
+      padding: clamp(20px, 4vw, 40px);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 20px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.05) inset;
+      overflow:hidden;
+      isolation:isolate;
+    }
+    .card::before{
+      content:""; position:absolute; inset:-2px; border-radius:30px; z-index:-1;
+      background: conic-gradient(from 0deg, var(--neon), var(--neon-2), var(--accent), var(--neon));
+      filter:blur(18px) saturate(140%);
+      opacity:.25; animation: spin 12s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .shine{
+      position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+      background: linear-gradient(120deg, rgba(255,255,255,.0) 0%, rgba(255,255,255,.35) 30%, rgba(255,255,255,0) 60%);
+      transform: translateX(-100%);
+      animation: shine 7s ease-in-out infinite;
+    }
+    @keyframes shine{50%{transform:translateX(0)} 100%{transform:translateX(100%)}}
+
+    header{display:flex; align-items:center; gap:14px; margin-bottom:18px}
+    .logo{
+      width:56px; height:56px; border-radius:16px; display:grid; place-items:center;
+      background: radial-gradient(90% 90% at 30% 20%, rgba(255,255,255,.8), rgba(255,255,255,.1) 50%),
+                  linear-gradient(135deg, rgba(255,107,53,.35), rgba(255,140,66,.35));
+      box-shadow: 0 0 22px var(--orange-glow), 0 0 2px rgba(0,0,0,.6) inset;
+      border:1px solid rgba(255,165,0,.4);
+      position:relative;
+    }
+    .logo svg{width:28px; height:28px; filter:drop-shadow(0 0 8px var(--orange-glow))}
+
+    h1{
+      margin:0; font-weight:800; letter-spacing:.2px;
+      font-size: clamp(28px, 4.2vw, 46px);
+      line-height:1.05;
+      text-shadow: 0 0 16px rgba(0,245,255,.35), 0 0 2px rgba(0,0,0,.6);
+      --glow: drop-shadow(0 0 2px var(--neon)) drop-shadow(0 0 10px var(--neon));
+      filter: var(--glow);
+    }
+    .tagline{color:var(--muted); font-weight:400; margin-top:6px}
+
+    /* glitch effect on word Maintenance */
+    .glitch{
+      position:relative; display:inline-block;
+    }
+    .glitch::before,.glitch::after{
+      content:attr(data-text); position:absolute; left:0; top:0; clip-path:inset(0 0 0 0);
+    }
+    .glitch::before{transform:translate(1px,0); color:var(--neon); animation: glitch1 2.1s infinite linear alternate-reverse}
+    .glitch::after{transform:translate(-1px,0); color:var(--neon-2); animation: glitch2 2s infinite linear alternate-reverse}
+    @keyframes glitch1{0%{clip-path:inset(0 0 85% 0)} 20%{clip-path:inset(0 0 5% 0)} 40%{clip-path:inset(50% 0 20% 0)} 60%{clip-path:inset(0 0 70% 0)} 80%{clip-path:inset(10% 0 10% 0)} 100%{clip-path:inset(80% 0 0 0)}}
+    @keyframes glitch2{0%{clip-path:inset(80% 0 0 0)} 20%{clip-path:inset(10% 0 10% 0)} 40%{clip-path:inset(0 0 70% 0)} 60%{clip-path:inset(50% 0 20% 0)} 80%{clip-path:inset(0 0 5% 0)} 100%{clip-path:inset(0 0 85% 0)}}
+
+    .grid{
+      display:grid; grid-template-columns: 1fr; gap:18px; margin-top:18px;
+    }
+    @media(min-width:760px){.grid{grid-template-columns:1.1fr .9fr}}
+
+    .pill{
+      display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:600; letter-spacing:.2px;
+      background:linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 10px 22px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      width:max-content
+    }
+    .dot{width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent), 0 0 2px rgba(0,0,0,.6); animation: pulse 1.6s ease-in-out infinite}
+    @keyframes pulse{50%{transform:scale(1.2)} 100%{transform:scale(1)}}
+
+    .desc{color:var(--muted); font-size:clamp(14px,1.6vw,16px); line-height:1.6}
+
+    .countdown{
+      display:flex; gap:12px; flex-wrap:wrap; margin:10px 0 2px
+    }
+    .box{
+      min-width:88px; padding:12px 10px; text-align:center; border-radius:16px;
+      background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 8px 20px rgba(0,0,0,.35);
+    }
+    .num{font-size:28px; font-weight:800; letter-spacing:.6px}
+    .lbl{font-size:12px; color:var(--muted); letter-spacing:.8px; text-transform:uppercase}
+
+    .bar{height:10px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; border:1px solid rgba(255,255,255,.20)}
+    .bar>i{display:block; height:100%; width:35%; background:linear-gradient(90deg,var(--neon),var(--neon-2));
+      box-shadow:0 0 18px var(--neon); animation: indet 2.4s ease-in-out infinite}
+    @keyframes indet{0%{transform:translateX(-110%)} 50%{transform:translateX(30%)} 100%{transform:translateX(110%)}}
+
+    .actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:14px}
+    .btn{
+      display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:14px; font-weight:700; letter-spacing:.3px;
+      background:linear-gradient(180deg, rgba(0,245,255,.25), rgba(124,77,255,.25));
+      color:var(--text); border:1px solid rgba(255,255,255,.30);
+      text-decoration:none; box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 12px rgba(0,245,255,.35);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .btn:hover{transform:translateY(-2px); filter:saturate(120%); box-shadow: 0 16px 36px rgba(0,0,0,.45), 0 0 22px rgba(0,245,255,.55)}
+    .ghost{background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08))}
+
+    footer{display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:18px; color:var(--muted); font-size:12px}
+    .links{display:flex; gap:14px; flex-wrap:wrap}
+    .links a{color:var(--muted); text-decoration:none}
+    .links a:hover{color:var(--text)}
+
+    /* Support: if no backdrop-filter, make the card more opaque */
+    @supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))){ .card{background: rgba(22,25,33,.9)} }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .shine, .card::before, .aurora, .bar>i, .glitch::before, .glitch::after { animation: none !important }
+    }
+
+    .orange-text {
+      color: var(--orange) !important;
+      background: linear-gradient(45deg, var(--orange), var(--orange-2), var(--orange-glow));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: orangeGlow 3s ease-in-out infinite;
+      text-shadow: 0 0 30px rgba(255, 165, 0, 0.5);
+      filter: drop-shadow(0 0 10px var(--orange-glow)) drop-shadow(0 0 2px var(--orange)) !important;
+      position: relative;
+    }
+
+    .orange-text::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+      animation: whiteShine 4s ease-in-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    @keyframes orangeGlow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 10px var(--orange-glow)) drop-shadow(0 0 2px var(--orange));
+        transform: scale(1);
+      }
+      50% { 
+        filter: drop-shadow(0 0 20px var(--orange-glow)) drop-shadow(0 0 5px var(--orange));
+        transform: scale(1.02);
+      }
+    }
+
+    @keyframes whiteShine {
+      0% { 
+        left: -100%;
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      50% { 
+        left: 100%;
+        opacity: 1;
+      }
+      100% { 
+        left: 100%;
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background video (loop, muted). Replace the src with your own MP4. -->
+  <div class="bg">
+    <video id="bgVideo" autoplay muted loop playsinline preload="auto">
+      <!-- Remplacez cette démo par votre vidéo hébergée (MP4/H.264) -->
+      <source src="https://cdn.coverr.co/videos/coverr-digital-lights-9713/1080p.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="aurora" aria-hidden="true"></div>
+  <canvas id="fx"></canvas>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="shine" aria-hidden="true"></div>
+
+      <header>
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 12h8l-3 3m3-3-3-3m6 0h8l-3 3m3-3-3-3" stroke="#ffa500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>
+            <span class="orange-text">TransfertCI</span> · <span class="glitch" data-text="Maintenance">Maintenance</span>
+          </h1>
+          <div class="tagline">Nous sommes désolés — le site est en maintenance pour finaliser des mises à jour et vous offrir le meilleur service.</div>
+        </div>
+      </header>
+
+      <div class="grid">
+        <section>
+          <div class="pill"><span class="dot"></span> Mises à jour en cours</div>
+          <p class="desc">Notre équipe déploie des améliorations de performance, de sécurité et d'ergonomie. Le service sera de nouveau disponible <strong>d'ici demain</strong>. Merci pour votre patience 💙</p>
+
+          <div class="countdown" id="countdown" role="timer" aria-live="polite">
+            <div class="box"><div class="num" id="d">0</div><div class="lbl">Jours</div></div>
+            <div class="box"><div class="num" id="h">24</div><div class="lbl">Heures</div></div>
+            <div class="box"><div class="num" id="m">00</div><div class="lbl">Minutes</div></div>
+            <div class="box"><div class="num" id="s">00</div><div class="lbl">Secondes</div></div>
+          </div>
+          <div class="bar" aria-hidden="true"><i></i></div>
+
+          <div class="actions">
+            <a class="btn" href="#" id="refreshBtn">Réessayer maintenant</a>
+            <a class="btn ghost" href="https://wa.me/message/XZAHESL3SSDOI1">Nous contacter</a>
+          </div>
+        </section>
+
+        <aside>
+          <ul style="list-style:none; padding:0; margin:0; display:grid; gap:12px">
+            <li class="pill" title="Disponibilité">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Rétablissement prévu: demain (08:00 GMT)
+            </li>
+            <li class="pill" title="Sécurité">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3l8 4v5c0 5-3.4 9.3-8 10-4.6-.7-8-5-8-10V7l8-4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Renforcement sécurité & fiabilité
+            </li>
+            <li class="pill" title="Performance">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 12h18M3 6h10M3 18h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Optimisations de performance
+            </li>
+            <li class="pill" title="Nouveautés">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2v6m0 8v6m8-8h-6m-4 0H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Nouvelles fonctionnalités à venir
+            </li>
+          </ul>
+        </aside>
+      </div>
+
+      <footer>
+        <div>© <span id="year"></span> TransfertCI · Tous droits réservés</div>
+        <div class="links">
+          <a href="#" id="notify">Activer l'alerte retour</a>
+          <a href="https://transfertci.com" target="_blank" rel="noopener">Page d'accueil</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Autoplay fallback handling
+    (async () => {
+      const v = document.getElementById('bgVideo');
+      try { await v.play(); } catch(e){ v.muted = true; v.play().catch(()=>{}); }
+    })();
+
+    // Fixed 24h countdown
+    const el = {d:document.getElementById('d'), h:document.getElementById('h'), m:document.getElementById('m'), s:document.getElementById('s')};
+    
+    function tick(){
+      // Compte à rebours fixe de 24h qui redémarre en boucle
+      const now = Date.now();
+      const elapsed = (now % (24 * 60 * 60 * 1000)) / 1000; // Secondes écoulées dans la journée
+      const remaining = 24 * 60 * 60 - elapsed; // Secondes restantes
+
+      const sec = Math.floor(remaining % 60);
+      const min = Math.floor((remaining % 3600) / 60);
+      const hrs = Math.floor(remaining / 3600);
+      const days = 0; // Toujours 0 pour un cycle de 24h
+
+      el.s.textContent = String(sec).padStart(2,'0');
+      el.m.textContent = String(min).padStart(2,'0');
+      el.h.textContent = String(hrs).padStart(2,'0');
+      el.d.textContent = days;
+      
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Refresh
+    document.getElementById('refreshBtn').addEventListener('click', (e)=>{ e.preventDefault(); location.reload(); });
+
+    // Simple Notification API (opt-in)
+    document.getElementById('notify').addEventListener('click', async (e)=>{
+      e.preventDefault();
+      if(!('Notification' in window)) return alert("Notifications non supportées sur ce navigateur.");
+      let perm = Notification.permission;
+      if(perm !== 'granted') perm = await Notification.requestPermission();
+      if(perm === 'granted') new Notification('TransfertCI', { body:'Nous vous préviendrons dès le retour en ligne ✨', icon:'' });
+    });
+
+    // Particles / soft glow dots
+    (function(){
+      const c = document.getElementById('fx');
+      const ctx = c.getContext('2d');
+      let w, h, dpr;
+      const N = 80; // number of particles
+      const P = [];
+      function resize(){
+        dpr = Math.min(window.devicePixelRatio||1, 2);
+        w = c.width = Math.floor(innerWidth * dpr);
+        h = c.height = Math.floor(innerHeight * dpr);
+        c.style.width = innerWidth + 'px';
+        c.style.height = innerHeight + 'px';
+      }
+      window.addEventListener('resize', resize, {passive:true}); resize();
+      function rnd(a,b){ return a + Math.random()*(b-a); }
+      for(let i=0;i<N;i++){
+        P.push({
+          x:rnd(0,w), y:rnd(0,h), r:rnd(1.2,3.5)*dpr, a:rnd(.15,.45), vx:rnd(-.08,.08), vy:rnd(-.08,.08)
+        });
+      }
+      function step(){
+        ctx.clearRect(0,0,w,h);
+        for(const p of P){
+          p.x += p.vx * 1.5; p.y += p.vy * 1.5;
+          if(p.x<0||p.x>w) p.vx*=-1; if(p.y<0||p.y>h) p.vy*=-1;
+          const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*6);
+          g.addColorStop(0, `rgba(0,245,255,${p.a})`);
+          g.addColorStop(.5, `rgba(124,77,255,${p.a*.6})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r*6,0,Math.PI*2); ctx.fill();
+        }
+        requestAnimationFrame(step);
+      }
+      step();
+    })();
+  </script>
+</body>
+</html>
